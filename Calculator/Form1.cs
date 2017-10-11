@@ -147,5 +147,22 @@ namespace Calculator
                 output().AppendText(".");
             }
         }
+
+        // Edit menu ops
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(output().Text);
+        }
+
+        private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string txt = Clipboard.GetText();
+            double num;
+
+            if (Double.TryParse(txt, out num))
+            {
+                output().Text = txt;
+            }
+        }
     }
 }
