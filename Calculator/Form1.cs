@@ -64,10 +64,9 @@ namespace Calculator
 
         public static void AppendDecimal(this TextBox textBox)
         {
-            double val = Double.Parse(textBox.Text);
 
             // Already has a decimal
-            if (val != (int)val)
+            if (textBox.Text.Contains("."))
             {
                 return;
             }
