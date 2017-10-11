@@ -10,16 +10,97 @@ using System.Windows.Forms;
 
 namespace Calculator
 {
-
-
     public partial class formCalculator : Form
     {
-        private TextBox output() => this.textCalculator;
+        private const string initText = "0"; // Initial value for output
+
+        private TextBox output() => this.textResult;
+        private bool newResult = false;
+        private double value = 0;
+        private string lastOp = "+";
+        
 
         public formCalculator()
         {
             InitializeComponent();
-            output().Text = "0"; // Initial value for output
+            output().Text = initText;
+        }
+
+        public void AppendDecimal()
+        {
+            if (newResult)
+            {
+                newResult = false;
+                output().Text = initText;
+            }
+
+            // Already has a decimal
+            if (output().Text.Contains("."))
+            {
+                return;
+            }
+            else
+            {
+                output().AppendText(".");
+            }
+        }
+
+        public void AppendNum(string num)
+        {
+            if (newResult)
+            {
+                newResult = false;
+                output().Text = initText;
+            }
+            output().AppendText(num);
+
+            // Has a decimal
+            if (output().Text.Contains("."))
+            {
+                return;
+            }
+            // Remove leading zeroes
+            else
+            {
+                output().Text = Double.Parse(output().Text).ToString();
+            }
+        }
+
+        public void Calculate(string op)
+        {
+            output().Text.TrimEnd('.');
+            textOperations.AppendText($" {output().Text} {op}");
+            double operand = Double.Parse(output().Text);
+            newResult = true;
+
+            // TODO: Division by zero handler
+            if (lastOp == "/" && output().Text == "0")
+            {
+                output().Text = initText;
+                return;
+            }
+
+            if (lastOp == "+") { value += operand; }
+            if (lastOp == "-") { value -= operand; }
+            if (lastOp == "*") { value *= operand; }
+            if (lastOp == "/") { value /= operand; }
+
+            lastOp = op;
+            output().Text = value.ToString();
+        }
+
+        public void Clear()
+        {
+            value = 0;
+            textOperations.Clear();
+            output().Text = initText;
+            newResult = false;
+        }
+
+        public void ClearError()
+        {
+            output().Text = initText;
+            newResult = false;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -28,51 +109,42 @@ namespace Calculator
         }
 
         // Numbers
-        private void button0_Click(object sender, EventArgs e) => output().AppendNum(((Button)sender).Text);
-        private void button1_Click(object sender, EventArgs e) => output().AppendNum(((Button)sender).Text);
-        private void button2_Click(object sender, EventArgs e) => output().AppendNum(((Button)sender).Text);
-        private void button3_Click(object sender, EventArgs e) => output().AppendNum(((Button)sender).Text);
-        private void button4_Click(object sender, EventArgs e) => output().AppendNum(((Button)sender).Text);
-        private void button5_Click(object sender, EventArgs e) => output().AppendNum(((Button)sender).Text);
-        private void button6_Click(object sender, EventArgs e) => output().AppendNum(((Button)sender).Text);
-        private void button7_Click(object sender, EventArgs e) => output().AppendNum(((Button)sender).Text);
-        private void button8_Click(object sender, EventArgs e) => output().AppendNum(((Button)sender).Text);
-        private void button9_Click(object sender, EventArgs e) => output().AppendNum(((Button)sender).Text);
+        private void buttonNum_Click(object sender, EventArgs e) => AppendNum(((Button)sender).Text);
 
         // Decimal
-        private void buttonDecimal_Click(object sender, EventArgs e) => output().AppendDecimal();
+        private void buttonDecimal_Click(object sender, EventArgs e) => AppendDecimal();
 
-    }
-
-    public static class ExtensionMethods
-    {
-        public static void AppendNum(this TextBox textBox, string num)
+        // Clears
+        private void buttonClear_Click(object sender, EventArgs e) => Clear();
+        private void buttonClearError_Click(object sender, EventArgs e) => ClearError();
+        private void buttonDelete_Click(object sender, EventArgs e)
         {
-            textBox.AppendText(num);
-
-            // Has a decimal
-            if (textBox.Text.Contains("."))
-            {
-                return;
-            }
-            // Remove leading zeroes
-            else
-            {
-                textBox.Text = Double.Parse(textBox.Text).ToString();
-            }
+            output().Text = output().Text.Substring(0, output().Text.Length - 1);
+            if (String.IsNullOrEmpty(output().Text)) { output().Text = initText; }
         }
 
-        public static void AppendDecimal(this TextBox textBox)
+        // Calculations
+        private void buttonDivide_Click(object sender, EventArgs e) => Calculate("/");
+        private void buttonMultiply_Click(object sender, EventArgs e) => Calculate("*");
+        private void buttonSubtract_Click(object sender, EventArgs e) => Calculate("-");
+        private void buttonAdd_Click(object sender, EventArgs e) => Calculate("+");
+        private void buttonEquals_Click(object sender, EventArgs e)
         {
+            Calculate("+");
 
-            // Already has a decimal
-            if (textBox.Text.Contains("."))
+            string result = output().Text;
+            Clear();
+            output().Text = result;
+        }
+
+        private void buttonSign_Click(object sender, EventArgs e)
+        {
+            bool decimalPoint = output().Text.EndsWith(".");
+            output().Text.TrimEnd('.');
+            output().Text = (Double.Parse(output().Text) * -1).ToString();
+            if (decimalPoint)
             {
-                return;
-            }
-            else
-            {
-                textBox.AppendText(".0");
+                output().AppendText(".");
             }
         }
     }
