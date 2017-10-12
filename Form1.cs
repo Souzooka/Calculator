@@ -134,6 +134,7 @@ namespace Calculator
 
             string result = output().Text;
             Clear();
+            newResult = true;
             output().Text = result;
         }
 
